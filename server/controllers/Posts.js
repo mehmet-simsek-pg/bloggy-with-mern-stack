@@ -1,7 +1,10 @@
 const Post = require("../models/PostModel");
+const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
+
+const secret = "PTx63GadL_-qoohS9ar9JStiPkMS6ZU4cdaPMsm6DrQ";
 
 const getPosts = async (req, res) => {
   res.json(
@@ -18,29 +21,21 @@ const getPost = async (req, res) => {
   res.json(postDoc);
 };
 
-const createPost =
-  (uploadMiddleware,
-  async (req, res) => {
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    const newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-
-    const { token } = req.cookies;
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
-      const { title, summary, content } = req.body;
-      const postDoc = await Post.create({
-        title,
-        summary,
-        content,
-        cover: newPath,
-        author: info.id,
-      });
-      res.json(postDoc);
+const createPost = async (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { title, summary, content, cover } = req.body;
+    const postDoc = await Post.create({
+      title,
+      summary,
+      content,
+      cover: cover,
+      author: info.id,
     });
+    res.json(postDoc);
   });
+};
 
 const updatePost =
   (uploadMiddleware,
