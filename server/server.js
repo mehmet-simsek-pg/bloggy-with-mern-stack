@@ -1,30 +1,29 @@
 require("dotenv").config();
 const express = require("express");
+const app = express();
+
 const cors = require("cors");
 const mongoose = require("mongoose");
-const app = express();
-const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const registerRouter = require("./routes/register");
-const loginRouter = require("./routes/login");
-const postRouter = require("./routes/posts");
-const profileRouter = require("./routes/profile");
+const path = require("path");
+
+const authRoute = require("./routes/auth");
+const userRoute = require("./routes/user");
+const postRouter = require("./routes/post");
+const upload = require("./middlewares/uploadImage");
 
 const connectDB = require("./db/connect");
-const verifyToken = require("./middlewares/verifyToken");
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use("/images", express.static(path.join(__dirname, "/images")));
 
-app.use("/register", registerRouter);
-app.use("/login", loginRouter);
+app.use("/auth", authRoute);
+app.use("/user", userRoute);
 app.use("/post", postRouter);
-app.use("/profile", profileRouter);
-
-app.post("/logout", (req, res) => {
-  res.cookie("token", "").json("ok");
+app.post("/upload", upload, (req, res) => {
+  res.status(200).json("Image has been uploaded");
 });
 
 const port = process.env.PORT || 5000;

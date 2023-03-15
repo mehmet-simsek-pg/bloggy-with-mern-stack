@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const login = require("../controllers/Login");
+const { getCategory, creatCategory } = require("../controllers/category");
 const { apiLimiter } = require("../middlewares/limiter");
 
-router.route("/").post(apiLimiter, login);
+router.route("/").get(apiLimiter, getCategory).post(apiLimiter, creatCategory);
 
 module.exports = router;
